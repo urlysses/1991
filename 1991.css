@@ -1,0 +1,131 @@
+html {
+    background: #2637dd;
+    font-family: "Roboto Mono", monospace;
+    font-weight: 500;
+    color: #d4d4d4;
+    -webkit-font-smoothing: antialiased;
+}
+header {
+    text-align: center;
+    margin-top: 8%;
+    font-family: "Rubik Mono One", sans-serif;
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+header p {
+    margin-top: 1em;
+}
+.l1991 {
+    font-size: 0;
+    position: relative;
+    display: inline-block;
+    width: 45%;
+    max-width: 600px;
+    min-width: 250px;
+    height: 60px;
+    margin-right: -1%;
+}
+.l {
+    display: inline-block;
+    width: 23%;
+    height: 100%;
+    margin-right: 2%;
+    box-sizing: border-box;
+    font-size: 0;
+    position: relative;
+}
+.l1 {
+    border-bottom: solid 9px;
+}
+.l1:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    border: solid 9px;
+    border-left: none;
+    border-bottom: none;
+    width: 69.23%;
+    height: 100%;
+}
+.l9:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 56.83%;
+    -webkit-border-radius: 15px;
+    -webkit-border-bottom-right-radius: 0;
+    -moz-border-radius: 15px;
+    -moz-border-radius-bottomright: 0;
+    border-radius: 15px;
+    border-bottom-right-radius: 0;
+    box-sizing: border-box;
+    border: solid 9px;
+}
+.l9:after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 97.89%;
+    height: 56.83%;
+    -webkit-border-bottom-right-radius: 20px;
+    -moz-border-radius-bottomright: 20px;
+    border-bottom-right-radius: 20px;
+    box-sizing: border-box;
+    border: solid 9px;
+    border-top: none;
+    border-left: none;
+}
+
+main {
+    margin-top: 8%;
+}
+article {
+    display: block;
+    width: 75%;
+    margin-left: 12.5%;
+}
+section {
+    text-align: justify;
+}
+main h1 {
+    font-family: "Rubik Mono One";
+    background: #d4d4d4;
+    color: #2637dd;
+    padding: 0.1em 0.3em;
+    font-size: 1.5em;
+}
+
+strong {
+    font-weight: inherit;
+    color: #2637dd;
+    background: #d4d4d4;
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+}
+a {
+    color: inherit;
+    text-shadow: 1px 1px #2637dd, -1px -1px #2637dd;
+    text-decoration: underline;
+}
+a:hover {
+    text-decoration: none;
+    text-decoration: line-through;
+}
+
+::selection {
+    background: #fff;
+    color: #2637dd;
+    text-shadow: none;
+}
+::-moz-selection {
+    background: #fff;
+    color: #2637dd;
+    text-shadow: none;
+}
+
