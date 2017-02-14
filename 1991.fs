@@ -2,6 +2,25 @@
 
 include unix/socket.fs
 
+
+\ User-defined routing
+wordlist constant routes
+: find-route ( addr u -- data )
+    routes search-wordlist if
+        >body @
+    else 0 then ;
+: register-route ( data addr u -- )
+    2dup routes search-wordlist if
+        routes drop nip nip
+        >body !
+    else
+        routes get-current >r set-current      \ switch definition word lists
+        nextname create ,
+        r> set-current
+    then ;
+
+
+\ Internal request handling
 : read-request ( socket -- addr u ) pad 4096 read-socket ;
 
 : send-response ( addr u socket -- )
@@ -15,18 +34,12 @@ include unix/socket.fs
         client read-request type s\" HTTP/1.1 200 OK\n Content-Type: text/html\n\n fffff" client send-response
     again ;
 
-: 1991: ( port -- ) create-server 0 start-server ;
+
+\ Userland
+: 1991: ( port -- )
+    create-server 0 start-server ;
 : 1991/ ( "<path> <word>" -- )
-    \ TODO store each path => xt and execute within
-    \ handle-server
-    bl word
-    cr ." Setting get for " count type
-    \ TODO handle non-words. Should give the user
-    \ some compile-/run-time error.
-    ' \ fetch xt
-    dup >name
-    cr ." handler word is " name>string type
-    cr ." running handler: " execute ;
+    bl word ' swap count register-route ;
 
 
 \ App demo:
