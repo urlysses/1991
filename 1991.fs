@@ -38,7 +38,7 @@ wordlist constant routes
         find-route dup if
                 execute
             else
-                0 or-404 exit
+                0 exit \ continue to 404
             then
         s\" HTTP/1.1 200 OK\n Content-Type: text/html\n\n" 2swap s+
     rdrop exit then ;
