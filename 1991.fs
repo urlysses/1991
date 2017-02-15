@@ -18,6 +18,13 @@ wordlist constant routes
         r> set-current
     then ;
 
+\ Public directory
+: pubvar create 0 , 0 , ;
+pubvar public
+: set-public-path ( addr u -- )
+    public 2! ;
+: get-public-path ( -- addr u )
+    public 2@ ;
 
 \ Internal request handling
 : read-request ( socket -- addr u ) pad 4096 read-socket ;
@@ -25,23 +32,36 @@ wordlist constant routes
 : send-response ( addr u socket -- )
     dup >r write-socket r> close-socket ;
 
-: or-404 ( addr u -- 404addr 404u )
-    2drop
-    s\" HTTP/1.1 404 Not Found\n Content-Type: text/plain\n\n 404" ;
-
 : requested-route ( addr u -- routeaddr routeu )
     bl scan 1- swap 1+ swap 2dup bl scan swap drop - ;
+
+: file-exists? ( addr u -- addr u bool )
+    2dup file-status nip 0= ;
+
+: serve-file ( addr u -- addr u )
+    slurp-file ;
 
 : either-resolve ( addr u -- resolveaddr resolveu )
     s" GET" search if
         requested-route
-        find-route dup if
-                execute
+        2dup find-route dup if
+                >r 2drop r>                 \ keep xt, drop the route string
+                execute                     \ execute the user's route handler
             else
-                0 exit \ continue to 404
+                drop                        \ drop the xt
+                get-public-path 2swap s+    \ see if route exists in public dir
+                file-exists? if
+                    serve-file              \ collect file contents
+                else
+                    exit                    \ continue to 404
+                then
             then
         s\" HTTP/1.1 200 OK\n Content-Type: text/html\n\n" 2swap s+
     rdrop exit then ;
+
+: or-404 ( addr u -- 404addr 404u )
+    2drop
+    s\" HTTP/1.1 404 Not Found\n Content-Type: text/plain\n\n 404" ;
 
 : prepare-response ( addr u -- returnaddr returnu)
     either-resolve or-404 ;
