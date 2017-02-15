@@ -2,7 +2,6 @@
 
 include unix/socket.fs
 
-
 \ User-defined routing
 wordlist constant routes
 : find-route ( addr u -- data )
@@ -24,27 +23,50 @@ wordlist constant routes
 : read-request ( socket -- addr u ) pad 4096 read-socket ;
 
 : send-response ( addr u socket -- )
-    dup >R write-socket R> close-socket ;
+    dup >r write-socket r> close-socket ;
+
+: or-404 ( addr u -- 404addr 404u )
+    2drop
+    s\" HTTP/1.1 404 Not Found\n Content-Type: text/plain\n\n 404" ;
+
+: requested-route ( addr u -- routeaddr routeu )
+    bl scan 1- swap 1+ swap 2dup bl scan swap drop - ;
+
+: either-resolve ( addr u -- resolveaddr resolveu )
+    s" GET" search if
+        requested-route
+        find-route dup if
+                execute
+            else
+                0 or-404 exit
+            then
+        s\" HTTP/1.1 200 OK\n Content-Type: text/html\n\n" 2swap s+
+    rdrop exit then ;
+
+: prepare-response ( addr u -- returnaddr returnu)
+    either-resolve or-404 ;
 
 : start-server { server client }
     begin
         server 255 listen
         server accept-socket to client
 
-        client read-request type s\" HTTP/1.1 200 OK\n Content-Type: text/html\n\n fffff" client send-response
+        client read-request prepare-response client send-response
     again ;
 
 
 \ Userland
 : 1991: ( port -- )
     create-server 0 start-server ;
-: 1991/ ( "<path> <word>" -- )
+: /1991 ( "<path> <word>" -- )
     bl word ' swap count register-route ;
 
 
 \ App demo:
-: handle-hi ." hi!" ; \ not sure printing is the way to go?
+: handle-/ s" fff" ;
+: handle-hi s" hi!" ;
 
-1991/ hi handle-hi
+/1991 / handle-/
+/1991 /hi handle-hi
 
-\ 8080 1991:
+8080 1991:
