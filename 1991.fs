@@ -80,13 +80,3 @@ pubvar public
     create-server 0 start-server ;
 : /1991 ( "<path> <word>" -- )
     bl word ' swap count register-route ;
-
-
-\ App demo:
-: handle-/ s" fff" ;
-: handle-hi s" hi!" ;
-
-/1991 / handle-/
-/1991 /hi handle-hi
-
-8080 1991:
