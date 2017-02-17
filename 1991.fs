@@ -37,6 +37,13 @@ pubvar public
 : get-public-path ( -- addr u )
     public 2@ ;
 
+\ Query params
+pubvar queryString
+: set-query-string ( addr u -- )
+    queryString 2! ;
+: get-query-string ( -- addr u )
+    queryString 2@ ;
+
 \ Request's Content-Type
 pubvar RequestContentType
 : set-content-type ( addr u -- )
@@ -95,8 +102,19 @@ s" image/x-icon" filetype: ico
 : send-response ( addr u socket -- )
     dup >r write-socket r> close-socket ;
 
-: requested-route ( addr u -- routeaddr routeu )
-    bl scan 1- swap 1+ swap 2dup bl scan swap drop - ;
+: store-query-string ( addr u -- raddr ru )
+    2dup s" ?" search if
+        2dup set-query-string                   \ store query string
+        swap drop -
+    else
+        s" " set-query-string                   \ store empty query string (reset)
+        2drop
+    then ;
+
+: requested-route ( addr u -- raddr ru )
+    bl scan 1- swap 1+ swap
+    2dup bl scan swap drop -                    \ get the space-separated route
+    store-query-string ;                        \ strip and store the query, leave route
 
 : file-exists? ( addr u -- addr u bool )
     2dup file-status nip 0= ;
