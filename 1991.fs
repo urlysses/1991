@@ -44,12 +44,29 @@ pubvar RequestContentType
 : get-content-type ( -- addr u )
     RequestContentType 2@ ;
 
-: ctype? ( addr u -- )
-    s" html" compare 0= if
-        s" text/html"
+: filetype: ( addr u "extension" -- )           \ takes a content-type and the extension
+    create here over 1+ allot place
+    does> count ;
+
+: get-filetype ( addr u -- caddr cu )           \ takes an extension, looks to find a definition
+    find-name dup if
+        name>int
+        execute
     else
+        drop
         s" text/plain"
     then ;
+
+s" text/plain" filetype: txt                    \ txt should always be defined
+s" text/html" filetype: html
+s" text/css" filetype: css
+s" text/javascript" filetype: js
+s" image/png" filetype: png
+s" image/gif" filetype: gif
+s" image/jpeg" filetype: jpg
+s" image/jpeg" filetype: jpeg
+s" image/x-icon" filetype: ico
+
 
 \ Internal request handling
 : HTTP/1.1 s" HTTP/1.1 " ;
@@ -95,17 +112,17 @@ pubvar RequestContentType
     2dup reverse ;                              \ reverse reversed extension
 
 : serve-file-type ( addr u -- )
-    .extension ctype? set-content-type ;
+    .extension get-filetype set-content-type ;
 
 : serve-file ( addr u -- addr u )
     slurp-file ;
 
-: 404content-type s" txt" ctype? ;
+: 404content-type txt ;
 : 404html s" 404";
 
 : either-resolve ( addr u -- resolveaddr resolveu )
     s" GET" search if
-        s" html" ctype? set-content-type        \ reset the request's content-type
+        s" html" get-filetype set-content-type  \ reset the request's content-type
         requested-route
         2dup find-route dup if
                 >r 2drop r>                     \ keep xt, drop the route string
