@@ -1,7 +1,8 @@
 \ App demo:
-include ~+/1991.fs
+include ../1991.fs
 
-s" ~+/examples/public" set-public-path
+sourcedir s" public" s+ set-public-path
+sourcedir s" views" s+ set-view-path
 
 : handle-/ s" fff" ;
 : handle-hi s" hi!" ;

@@ -12,6 +12,20 @@ include unix/socket.fs
         2dup exchange
     -1 /string
     repeat 2drop ;
+: sourcedir ( -- saddr su )
+    \ Returns the directory in which the file
+    \ invoking the word finds itself
+    \ relative to gforth's execution directory.
+    \ Useful for specifying in which dir to find
+    \ specific files (e.g., public/, views/).
+    sourcefilename                              \ get the name of our file
+    2dup reverse                                \ reverse and search for first /
+    s" /" search if                             \ if found, reverse string to
+            2dup reverse                        \ to strip the filename but keep dir.
+        else
+            2drop                               \ no slash,
+            s" ./"                              \ same dir execution.
+        then ;
 
 \ User-defined routing
 wordlist constant routes
@@ -36,6 +50,15 @@ pubvar public
     public 2! ;
 : get-public-path ( -- addr u )
     public 2@ ;
+sourcedir s" public" s+ set-public-path
+
+\ Views directory
+pubvar views
+: set-view-path ( addr u -- )
+    views 2! ;
+: get-view-path ( -- addr u )
+    views 2@ ;
+sourcedir s" views" s+ set-view-path
 
 \ Query params
 pubvar queryString
