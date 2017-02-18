@@ -19,9 +19,11 @@ include unix/socket.fs
     \ Useful for specifying in which dir to find
     \ specific files (e.g., public/, views/).
     sourcefilename                              \ get the name of our file
+    pad dup >r place                            \ copy the string so we don't
+    r> count                                    \       modify sourcefilename.
     2dup reverse                                \ reverse and search for first /
     s" /" search if                             \ if found, reverse string to
-            2dup reverse                        \ to strip the filename but keep dir.
+            2dup reverse                        \ strip the filename but keep dir.
         else
             2drop                               \ no slash,
             s" ./"                              \ same dir execution.
