@@ -28,6 +28,8 @@ include unix/socket.fs
             2drop                               \ no slash,
             s" ./"                              \ same dir execution.
         then ;
+: file-exists? ( addr u -- addr u bool )
+    2dup file-status nip 0= ;
 
 \ User-defined routing
 wordlist constant routes
@@ -60,7 +62,79 @@ pubvar views
     views 2! ;
 : get-view-path ( -- addr u )
     views 2@ ;
-sourcedir s" views" s+ set-view-path
+sourcedir s" views/" s+ set-view-path           \ Needs that trailing slash
+
+\ Handling views
+pubvar viewoutput
+: set-view-output ( addr u -- )
+    viewoutput 2! ;
+: get-view-output ( -- addr u )
+    viewoutput 2@ ;
+: parse-view ( addr u -- )
+    \ Get string between <$ $> and invoke `evaluate`.
+    \ Append to viewoutput as we go.
+    \ There's probably a better way of doing this
+    \ but it works for me.
+    begin
+    2dup s" <$" search if
+            2over swap 2>r                      \ If there is a match for <$, save addr and u.
+            swap >r dup >r                      \ Store the match and output anything that
+            -                                   \ comes before it.
+            get-view-output +s
+            set-view-output
+            r> r> swap                          \ Then reinstate the match "<$...".
+            2dup s" $>" search if               \ Check to see if there's a closing tag $>.
+                2 -                             \ Add the close tag to the search result.
+                swap drop                       \ save the end position of $>.
+                dup >r
+                -                               \ Reduce the string to <$ ... $>.
+                evaluate                        \ Run user's code (maybe a bad idea?).
+                r>                              \ Retrieve our saved end position of $>.
+                r> r>                           \ Retrive the addr u from start of loop iter.
+                rot                             \ Bring end $> to stack top.
+                over >r                         \ Store the real string's length.
+                -                               \ Subtract end $> from u to get the pos from top
+                r> swap                         \ that we'd like to strip away. Restore saved u.
+                /string                         \ Drop top of the string until the end of $>.
+                0                               \ Keep looping.
+            else
+                get-view-output +s              \ No closing tag. Just save the full string.
+                set-view-output
+                2rdrop                          \ And drop the stored addr and u
+                2drop                           \ as well as both the 2dup we made before
+                2drop                           \ searching twice.
+                -1                              \ Exit the loop.
+            then
+        else
+            2drop                               \ No match for <$. Drop the 2dup from before search.
+            get-view-output +s
+            set-view-output                     \ Save string as-is to view output
+            -1                                  \ exit the loop
+        then
+    until ;
+: render-view ( addr u -- vaddr vu )            \ Accepts a view filename. Returns parsed contents.
+    s" " set-view-output
+    get-view-path +s
+    file-exists? if
+            slurp-file
+            parse-view
+        else
+            exit                                \ Continue to 404, no view.
+        then
+    get-view-output ;
+: <$ ( -- ) ;                                   \ Do nothing.
+: $> ( -- ) ;                                   \ Do nothing.
+: $type ( addr u -- )                           \ User-land word for outputing via views.
+    get-view-output +s
+    set-view-output ;
+: import ( -- )                                 \ User-land word for including other view files.
+    get-view-path +s
+    file-exists? if
+            slurp-file
+            parse-view
+        else
+            s" "
+        then ;
 
 \ Query params
 pubvar queryString
@@ -140,9 +214,6 @@ s" image/x-icon" filetype: ico
     bl scan 1- swap 1+ swap
     2dup bl scan swap drop -                    \ get the space-separated route
     store-query-string ;                        \ strip and store the query, leave route
-
-: file-exists? ( addr u -- addr u bool )
-    2dup file-status nip 0= ;
 
 : .extension ( addr u -- addr u )
     2dup reverse                                \ reverse the file name

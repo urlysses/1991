@@ -9,5 +9,5 @@ A server-side web framework written in Forth.
 unless otherwise specified by user.
 + [x] query arguments
 + [ ] PUT, POST, DELETE
-+ [ ] templating
++ [x] templating
 + [ ] fuzzy-/pattern-match-enabled user routes (e.g., /something/*/wildcard)?
