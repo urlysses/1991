@@ -38,6 +38,33 @@ include unix/socket.fs
     2dup file-status nip 0= ;
 : pubvar create 0 , 0 , ;
 
+\ Query params
+pubvar queryString
+: set-query-string ( addr u -- )
+    queryString 2! ;
+: get-query-string ( -- addr u )
+    queryString 2@ ;
+: add-to-query-string ( addr u -- )
+    get-query-string
+    dup if                                      \ If queryString isn't empty, add & before
+        s" &" s+
+    then
+    +s                                          \ adding our new query values.
+    set-query-string ;
+
+pubvar tmpQueryString
+: set-tmp-query-string ( addr u -- )
+    tmpQueryString 2! ;
+: get-tmp-query-string ( -- addr u )
+    tmpQueryString 2@ ;
+: add-to-tmp-query-string ( addr u -- )
+    get-tmp-query-string
+    dup if                                      \ If queryString isn't empty, add & before
+        s" &" s+
+    then
+    +s                                          \ adding our new query values.
+    set-tmp-query-string ;
+
 \ User-defined routing
 wordlist constant routes
 pubvar reqroute
@@ -61,6 +88,9 @@ pubvar reqroute
     then
     rdrop
     ?dup if
+        get-tmp-query-string                    \ Save our fuzzy vars to the request's
+        add-to-query-string                     \ query real string.
+
         name>int                                \ Get the xt of the nt.
         -1                                      \ Return true.
     else
@@ -70,6 +100,7 @@ pubvar reqroute
     \ Takes a route name token and returns
     \ whether that route name fuzzy matches
     \ the requested url
+    s" " set-tmp-query-string                   \ Reset tmp query string.
     name>string                                 \ Get the string value of the NT.
     2dup s" <" search if                        \ See if the route expects fuzzy matching.
         2drop                                   \ Drop search results.
@@ -88,15 +119,27 @@ pubvar reqroute
                 else
                     2drop
                 then
+                \ (
+                2dup 2r> 2swap 2>r 2>r          \ (Store a copy of the real value of <match>.)
+                \ )
                 2r@
                 2dup s" <" search drop          \ and replace <...> with the requested route word
-                swap drop -
+                swap drop
+                \ (
+                over over - 1+ 2r@ rot /string  \ (Store the beginnings of user's <"match"> word.)
+                2dup s" >" search drop          \ (Retrieve full <"match"> user word,)
+                swap drop - s" =" s+
+                2r> 2r> 2swap 2>r
+                s+                              \ (and associate it with the request value,)
+                add-to-tmp-query-string         \ (before saving it to the tmp query string.)
+                \ )
+                -
                 +s                              \ by prepending pre-< to route word
                 2r> s" >" search drop 1 /string \ and then by appending post-> to route word.
                 s+
-                2>r
-                2drop
-                2r>
+                2>r                             \ Save string progress,
+                2drop                           \ drop old string,
+                2r>                             \ set new string for start of next loop (or end).
             loop
             get-requested-route compare         \ Check to see if the strings match.
         else
@@ -222,13 +265,6 @@ pubvar viewoutput
             s" "
         then ;
 
-\ Query params
-pubvar queryString
-: set-query-string ( addr u -- )
-    queryString 2! ;
-: get-query-string ( -- addr u )
-    queryString 2@ ;
-
 \ Request's Content-Type
 pubvar RequestContentType
 : set-content-type ( addr u -- )
@@ -289,10 +325,10 @@ s" image/x-icon" filetype: ico
 
 : store-query-string ( addr u -- raddr ru )
     2dup s" ?" search if
-        2dup set-query-string                   \ store query string
+        2dup 1 /string set-query-string         \ Store query string (without leading "?").
         swap drop -
     else
-        s" " set-query-string                   \ store empty query string (reset)
+        s" " set-query-string                   \ Store empty query string (reset).
         2drop
     then ;
 

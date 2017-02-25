@@ -10,4 +10,4 @@ unless otherwise specified by user.
 + [x] query arguments
 + [ ] PUT, POST, DELETE
 + [x] templating
-+ [ ] fuzzy-/pattern-match-enabled user routes (e.g., /something/*/wildcard)?
++ [x] fuzzy-/pattern-match-enabled user routes (e.g., /something/*/wildcard)?

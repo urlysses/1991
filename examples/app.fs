@@ -21,17 +21,17 @@ sourcedir s" views/" s+ set-view-path
 /1991 /import handle-import
 
 : handle-uid
-    s" uid:" ;
+    s" uid:" get-query-string s+ ;
 : handle-uid-new
-    s" uid:new" ;
+    s" uid:new:" get-query-string s+ ;
 : handle-uid-delete
-    s" uid:delete" ;
+    s" uid:delete:" get-query-string s+ ;
 : handle-pid
-    s" pid:" ;
+    s" pid:" get-query-string s+ ;
 : handle-pid-new
-    s" pid:new" ;
+    s" pid:new:" get-query-string s+ ;
 : handle-pid-delete
-    s" pid:delete" ;
+    s" pid:delete:" get-query-string s+ ;
 /1991 /api/v1/users/<uid> handle-uid
 /1991 /api/v1/users/<uid>/new handle-uid-new
 /1991 /api/v1/users/<uid>/delete handle-uid-delete
