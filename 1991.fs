@@ -111,11 +111,11 @@ pubvar reqroute
                 2dup 2>r
                 2r@
                 2dup s" <" search drop          \ Get position of "<",
-                swap drop -
-                swap drop
+                nip -
+                nip
                 get-requested-route rot /string \ crop until there in the requested route,
                 2dup s" /" search if            \ search for the next / or end of route,
-                    swap drop -
+                    nip -
                 else
                     2drop
                 then
@@ -124,11 +124,11 @@ pubvar reqroute
                 \ )
                 2r@
                 2dup s" <" search drop          \ and replace <...> with the requested route word
-                swap drop
+                nip
                 \ (
                 over over - 1+ 2r@ rot /string  \ (Store the beginnings of user's <"match"> word.)
                 2dup s" >" search drop          \ (Retrieve full <"match"> user word,)
-                swap drop - s" =" s+
+                nip - s" =" s+
                 2r> 2r> 2swap 2>r
                 s+                              \ (and associate it with the request value,)
                 add-to-tmp-query-string         \ (before saving it to the tmp query string.)
@@ -214,7 +214,7 @@ pubvar viewoutput
             r> r> swap                          \ Then reinstate the match "<$...".
             2dup s" $>" search if               \ Check to see if there's a closing tag $>.
                 2 -                             \ Add the close tag to the search result.
-                swap drop                       \ save the end position of $>.
+                nip                             \ Save the end position of $>.
                 dup >r
                 -                               \ Reduce the string to <$ ... $>.
                 evaluate                        \ Run user's code (maybe a bad idea?).
@@ -326,7 +326,7 @@ s" image/x-icon" filetype: ico
 : store-query-string ( addr u -- raddr ru )
     2dup s" ?" search if
         2dup 1 /string set-query-string         \ Store query string (without leading "?").
-        swap drop -
+        nip -
     else
         s" " set-query-string                   \ Store empty query string (reset).
         2drop
@@ -334,14 +334,14 @@ s" image/x-icon" filetype: ico
 
 : requested-route ( addr u -- raddr ru )
     bl scan 1- swap 1+ swap
-    2dup bl scan swap drop -                    \ get the space-separated route
+    2dup bl scan nip -                          \ get the space-separated route
     store-query-string ;                        \ strip and store the query, leave route
 
 : .extension ( addr u -- addr u )
     2dup reverse                                \ reverse the file name
     2dup s" ." search                           \ search for the first occurance of "."
     if
-        swap drop -                             \ remove the "." from the search results
+        nip -                                   \ remove the "." from the search results
     else
         s" txt"
     then
