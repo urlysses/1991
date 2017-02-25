@@ -5,6 +5,12 @@ include unix/socket.fs
 \ Helper words
 : +s ( addr1 u1 addr2 u2 -- addr3 u3 )          \ like s+ but prepend rather than append.
     2swap s+ ;
+: str-count ( addr1 u1 addr2 u2 -- u3 )         \ Counts occurrences of addr2 within addr1.
+    2swap 0 >r
+    begin 2over search
+    while 2over nip /string
+        r> 1+ >r
+    repeat 2drop 2drop r> ;
 : exchange ( a1 a2 -- )
     2dup c@ swap c@ rot c! swap c! ;
 : reverse ( caddr u -- )                        \ reverse a string
@@ -30,13 +36,94 @@ include unix/socket.fs
         then ;
 : file-exists? ( addr u -- addr u bool )
     2dup file-status nip 0= ;
+: pubvar create 0 , 0 , ;
 
 \ User-defined routing
 wordlist constant routes
+pubvar reqroute
+: set-requested-route ( addr u -- )
+    reqroute 2! ;
+: get-requested-route ( -- addr u )
+    reqroute 2@ ;
+: fuzzy-find-route ( xt -- xt' bool )
+    \ Takes an xt that accepts a name token
+    \ and returns a bool.
+    \ Traverse will run as long as xt
+    \ returns true.
+    \ Also takes the addr u of the requested
+    \ route we're trying to validate.
+    >r routes wordlist-id @                     \ Store xt and specify wordlist
+    begin
+    dup
+    while
+        r@ over >r execute while r> @
+    repeat r>
+    then
+    rdrop
+    ?dup if
+        name>int                                \ Get the xt of the nt.
+        -1                                      \ Return true.
+    else
+        0
+    then ;
+: fuzzy-compare ( nt -- bool )
+    \ Takes a route name token and returns
+    \ whether that route name fuzzy matches
+    \ the requested url
+    name>string                                 \ Get the string value of the NT.
+    2dup s" <" search if                        \ See if the route expects fuzzy matching.
+        2drop                                   \ Drop search results.
+        2dup s" /" str-count >r                 \ Check to see if both routes have the same
+        get-requested-route s" /" str-count     \ number of / occurrences.
+        r> = if
+            2dup s" <" str-count 0 do
+                2dup 2>r
+                2r@
+                2dup s" <" search drop          \ Get position of "<",
+                swap drop -
+                swap drop
+                get-requested-route rot /string \ crop until there in the requested route,
+                2dup s" /" search if            \ search for the next / or end of route,
+                    swap drop -
+                else
+                    2drop
+                then
+                2r@
+                2dup s" <" search drop          \ and replace <...> with the requested route word
+                swap drop -
+                +s                              \ by prepending pre-< to route word
+                2r> s" >" search drop 1 /string \ and then by appending post-> to route word.
+                s+
+                2>r
+                2drop
+                2r>
+            loop
+            get-requested-route compare         \ Check to see if the strings match.
+        else
+            2drop                               \ Drop name>string.
+            -1                                  \ Keep looping.
+        then
+    else
+        2drop                                   \ Drop search results.
+        2drop                                   \ Drop name>string.
+        -1                                      \ Keep looping.
+    then ;
+: fuzzy-match ( addr u -- xt bool )
+    set-requested-route
+    ['] fuzzy-compare fuzzy-find-route ;
 : find-route ( addr u -- data )
+    2dup 2>r
     routes search-wordlist if
+        2rdrop                                  \ Exact match found. Drop the dup string.
         >body @
-    else 0 then ;
+    else
+        2r>
+        fuzzy-match if                          \ Fuzzy match found.
+            >body @
+        else
+            0                                   \ No match at all.
+        then
+    then ;
 : register-route ( data addr u -- )
     2dup routes search-wordlist if
         routes drop nip nip
@@ -48,7 +135,6 @@ wordlist constant routes
     then ;
 
 \ Public directory
-: pubvar create 0 , 0 , ;
 pubvar public
 : set-public-path ( addr u -- )
     public 2! ;
