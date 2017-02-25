@@ -126,7 +126,7 @@ pubvar reqroute
                 2dup s" <" search drop          \ and replace <...> with the requested route word
                 nip
                 \ (
-                over over - 1+ 2r@ rot /string  \ (Store the beginnings of user's <"match"> word.)
+                2dup - 1+ 2r@ rot /string       \ (Store the beginnings of user's <"match"> word.)
                 2dup s" >" search drop          \ (Retrieve full <"match"> user word,)
                 nip - s" =" s+
                 2r> 2r> 2swap 2>r
