@@ -354,7 +354,7 @@ s" image/x-icon" filetype: ico
     slurp-file ;
 
 : 404content-type txt ;
-: 404html s" 404";
+: 404html s" 404" ;
 
 : either-resolve ( addr u -- resolveaddr resolveu )
     s" GET" search if
