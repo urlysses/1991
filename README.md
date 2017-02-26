@@ -8,6 +8,6 @@ A server-side web framework written in Forth.
 + [x] file-serving if no user-defined routes match. Search "public/" dir
 unless otherwise specified by user.
 + [x] query arguments
-+ [ ] PUT, POST, DELETE
++ [x] PUT, POST, DELETE
 + [x] templating
 + [x] fuzzy-/pattern-match-enabled user routes (e.g., /something/*/wildcard)?

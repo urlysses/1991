@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>GET, PUT, POST, DELETE</title>
+    </head>
+    <body>
+        <input type="submit" value="GET" id="get">
+        <input type="submit" value="POST" id="post">
+        <input type="submit" value="PUT" id="put">
+        <input type="submit" value="DELETE" id="delete">
+        <script type="text/javascript">
+            // https://gist.github.com/EtienneR/2f3ab345df502bd3d13e
+            (function () {
+                function onload () {
+                    var rt = xhr.responseText;
+                    console.log(rt, xhr.readyState, xhr.status);
+                }
+                var url = "/api/v1/users";
+                var xhr = new XMLHttpRequest();
+                var get = document.querySelector("#get");
+                var post = document.querySelector("#post");
+                var put = document.querySelector("#put");
+                var del = document.querySelector("#delete");
+
+                // GET
+                get.onclick = function () {
+                    xhr.open("GET", url + "/1", true);
+                    xhr.onload = onload;
+                    xhr.send(null);
+                };
+
+                // POST
+                // TODO: 201 status
+                post.onclick = function () {
+                    var data = {};
+                    data.firstname = "Aaaa";
+                    data.lastname  = "Bbbb";
+                    var json = JSON.stringify(data);
+                    xhr = new XMLHttpRequest();
+                    xhr.open("POST", url + "/1", true);
+                    xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+                    xhr.onload = onload;
+                    xhr.send(json);
+                };
+
+                // PUT
+                put.onclick = function () {
+                    var data = {};
+                    data.firstname = "Aaaa2";
+                    data.lastname  = "Bbbb2";
+                    var json = JSON.stringify(data);
+                    xhr = new XMLHttpRequest();
+                    xhr.open("PUT", url + "/2", true);
+                    xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+                    xhr.onload = onload;
+                    xhr.send(json);
+                };
+
+                // DELETE
+                del.onclick = function () {
+                    xhr = new XMLHttpRequest();
+                    xhr.open("DELETE", url + "/2", true);
+                    xhr.onload = onload;
+                    xhr.send(null);
+                };
+            }());
+        </script>
+    </body>
+</html>

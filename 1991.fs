@@ -11,6 +11,10 @@ include unix/socket.fs
     while 2over nip /string
         r> 1+ >r
     repeat 2drop 2drop r> ;
+: -leading ( addr len -- addr' len' )
+    begin over c@ bl = while 1 /string repeat ;
+: trim ( addr len -- addr' len')
+    -leading -trailing ;
 : exchange ( a1 a2 -- )
     2dup c@ swap c@ rot c! swap c! ;
 : reverse ( caddr u -- )                        \ reverse a string
@@ -64,6 +68,20 @@ pubvar tmpQueryString
     then
     +s                                          \ adding our new query values.
     set-tmp-query-string ;
+
+\ Request body
+pubvar requestBody
+: set-request-body ( addr u -- )
+    requestBody 2! ;
+: get-request-body ( -- addr u )
+    requestBody 2@ ;
+
+\ Request method
+pubvar requestMethod
+: set-request-method ( addr u -- )
+    requestMethod 2! ;
+: get-request-method ( -- addr u )
+    requestMethod 2@ ;
 
 \ User-defined routing
 wordlist constant routes
@@ -317,8 +335,35 @@ s" image/x-icon" filetype: ico
     2swap content-type                          \ Set content-type
     s+ ;                                        \ Join
 
+: get-content-length ( addr u -- clen )
+    s" Content-Length:" search if
+        2dup s\" \n" search drop nip -
+        s" Content-Length:" nip /string
+        trim
+        s>number?
+        2drop
+    else
+        2drop
+        0
+    then ;
+
+: read-request-body ( socket u -- )
+    \ Takes the socket and the length of the
+    \ body (Content-Length).
+    here swap aligned read-socket
+    set-request-body ;
 : read-request ( socket -- addr u )
-    pad 4096 read-socket ;
+    \ Returns the request header
+    \ but also collects the request body.
+    dup >r
+    pad 4096 read-socket
+    r> dup 2over rot drop
+    get-content-length ?dup if
+        read-request-body
+    else
+        s" " set-request-body
+        drop
+    then ;
 
 : send-response ( addr u socket -- )
     dup >r write-socket r> close-socket ;
@@ -356,8 +401,42 @@ s" image/x-icon" filetype: ico
 : 404content-type txt ;
 : 404html s" 404" ;
 
+: valid-method? ( addr u -- addr' u' bool )
+    2dup s" GET" search if
+        2nip
+        -1
+        s" GET" set-request-method
+        exit
+    then
+    2drop
+
+    2dup s" POST" search if
+        2nip
+        -1
+        s" POST" set-request-method
+        exit
+    then
+    2drop
+
+    2dup s" PUT" search if
+        2nip
+        -1
+        s" PUT" set-request-method
+        exit
+    then
+    2drop
+
+    2dup s" DELETE" search if
+        2nip
+        -1
+        s" DELETE" set-request-method
+        exit
+    then
+    2drop
+    0 ;
+
 : either-resolve ( addr u -- resolveaddr resolveu )
-    s" GET" search if
+    valid-method? if
         s" html" get-filetype set-content-type  \ reset the request's content-type
         requested-route
         2dup find-route dup if
@@ -374,7 +453,8 @@ s" image/x-icon" filetype: ico
                 then
             then
         200 get-content-type set-header +s
-        rdrop exit then ;
+        rdrop exit
+    then ;
 
 : or-404 ( addr u -- 404addr 404u )
     2drop
