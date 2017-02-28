@@ -11,3 +11,6 @@ unless otherwise specified by user.
 + [x] PUT, POST, DELETE
 + [x] templating
 + [x] fuzzy-/pattern-match-enabled user routes (e.g., /something/*/wildcard)?
++ [ ] server-side cookies
++ [ ] websockets
++ [ ] is https a thing?
