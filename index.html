@@ -6,6 +6,8 @@
         <title>1991</title>
         <link href="1991.css" type="text/css" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:500,500i|Rubik+Mono+One" rel="stylesheet">
+        <meta name="description" content="A server-side web framework written in Forth.">
+        <meta name="keywords" content="1991, 1-9-9-1, 1QQ1, 1Q91, gforth, forth, web, framework, http, server, url">
     </head>
     <body>
         <header>
@@ -20,8 +22,170 @@
         <main>
             <article>
                 <section>
+                    <h1>World Wild Web</h1>
+                    <p>
+                        The year is 1991. The World Wide Web has just seen public release. <strong>1991</strong> looks to ease your interactions with the new web using cutting edge programming techniques in Forth (well, Gforth).
+                    </p>
+                </section>
+                <section>
+                    <h1>Logging In</h1>
+                    <p>
+                        Getting started in <strong>1991</strong> is easy.
+                    </p>
+                    <p>
+                        All you need to do is include <code>1991.fs</code> into your Forth source file. Next, you can define your public routes using the <code>/1991</code> word. Once your routes are all layed out, start the server using <code>1991:</code>.
+                    </p>
+<pre>
+\ app.fs
+\ Load 1991.
+include 1991.fs
+
+\ Define our route handlers.
+: handle-/ ( -- addr u )
+    \ Any string returned by the handler
+    \ will be output to the browser.
+    s" Hello, 1991." ;
+
+\ Set up our routes.
+/1991 / handle-/
+
+\ Start the server on port 8080.
+8080 1991:
+</pre>
+                    <h2>Logging In II: Logging In, Deeper </h2>
+                    <h3>Route Wildcards (Fuzzy Routing / URL Mapping)</h3>
+                    <p>
+                        If you want to specify that some part of a route is a wildcard (accepts any value), then you can wrap some named value in <code>&lt;chevrons&gt;</code>. <strong>1991</strong> will accept any URL that matches your wildcard pattern, setting the internal value of whatever you place between the chevrons to whatever is actually requested.
+                    </p>
+                    <p>
+                        In the example below, <code>&lt;uid&gt;</code> specifies that we're willing to accept any (non-empty) value in its place which we'd like to access using the name <code>uid</code>.
+                    </p>
+<pre>
+\ wildcards.fs
+\ Load 1991.
+include 1991.fs
+
+\ Define our route handler.
+: handle-wildcard-route ( -- addr u )
+    s" contents of the route request: " get-query-string s+ ;
+
+\ Set up our route.
+/1991 /users/&lt;uid> handle-wildcard-route
+
+\ We can set up multiple wildcards too (must be slash-separated).
+/1991 /users/&lt;uid>/posts/&lt;pid> handle-wildcard-route
+
+\ Start server on port 8080.
+8080 1991:
+</pre>
+                    <p>
+                         All wildcards are treated similar to query string arguments. As such, wildcards can be retrieved using <code>get-query-string</code>.
+                    </p>
+                    <p>
+                        In the example above, visiting <code>http://localhost:8080/users/urlysses</code> will result in the following query string: <code>uid=urlysses</code>.
+                    <h3>File Serving</h3>
+                    <p>
+                        Use a <code>public/</code> directory to act as a basic fileserver.
+                        Whenever a requested URL doesn't resolve through the registered routes, <strong>1991</strong> will attempt to find the requested route within your specified public directory.
+                    </p>
+<pre>
+\ public.fs
+\ Load 1991.
+include 1991.fs
+
+\ Specify the location of our public directory.
+\ Anything in the public/ directory within the
+\ same dir as this source file will resolve.
+\ You can change "public" to anything you want
+\ as long as it matches your directory name.
+sourcedir s" public" s+ set-public-path
+
+\ We can set mimetypes using the `filetype:` word.
+\ In the case below, we want .mp4 files to be served
+\ with the content-type video/mp4.
+s" video/mp4" filetype: mp4
+
+\ Start the server on port 8080.
+8080 1991:
+</pre>
+                    <p>
+                        In the above example, If we have a file <code>public/my-video.mp4</code>, then it will be available through <code>http://localhost:8080/my-video.mp4</code>.
+                    </p>
+
+                    <h3>Views</h3>
+                    <p>
+                        <strong>1991</strong> offers basic templating through views.
+                    </p>
+                    <p>
+                        In order to get started, you should specify the <code>views/</code> path. Notice the trailing slash, which differs from how we define <code>public</code>.
+                    </p>
+                    <p>
+                        Once you've specified your views/ directory, you can write views/ files to it. This can be any kind of file, honestly. The benefit offered by views/ is the ability to use basic templating. You can write any valid Forth code within opening (<code><$ </code>) and closing (<code> $></code>) tags. Additionally, you can use the <code>import</code> word to import other views into your view.
+                    </p>
+<pre>
+\ views.fs
+\ Load 1991.
+include 1991.fs
+
+\ Specify the location of our views directory.
+sourcedir s" views/" s+ set-view-path
+
+\ Define some words we'll use within
+\ our view.
+: page-title ( -- addr u )
+    s" Dynamic page title" ;
+: ten-lines ( -- )
+    10 0 do
+        s" line " <# #s #> s+
+        s" &lt;br>" s+
+        $type
+    loop ;
+
+\ Use render-view to output the contents
+\ of a file in the views/ directory.
+: handle-/index
+    s" index.html" render-view ;
+
+\ Start the server on port 8080.
+8080 1991:
+</pre>
+<pre>
+\ views/index.html
+&lt;!DOCTYPE html>
+&lt;html>
+    &lt;head>
+        &lt;meta charset="utf-8">
+        &lt;title><$ page-title $type $>&lt;/title>
+    &lt;/head>
+    &lt;body>
+        <$ ten-lines $>
+        <$ s" imported-view.html" import $>
+    &lt;/body>
+&lt;/html>
+</pre>
+<pre>
+\ views/imported-view.html
+It's possible to import view files from within other view files. This is from &lt;code>views/imported-view.html&lt;/code>
+</pre>
+                </section>
+                <section>
+                    <h1>Wait, what?</h1>
+                    <h2>Why is <code>1991:</code> post-fix when <code>/1991</code> is pre-fix?</h2>
+                    <p>
+                        Forth is a (mostly) post-fix notation language. So, for example, you'd write two plus two as <code>2 2 +</code>. This is the language's natural and immediate notation. Along those lines, <code>1991:</code> is an immediate word&mdash;&mdash;running it results in immediate action. As such, we use Forth's post-fix notation to set the port and start the server immediately. Alternately, <code>/1991</code> doesn't exactly have immediate effect per se. All it does is tell <strong>1991</strong> that any request to <code>/path</code> should be handled by <code>path-handler</code>. As such, we opt to write non-immediate code using pre-fix notation.
+                    </p>
+                    <h2>You're using Gforth, which came out in 1992. Also, it's 2017.</h2>
+                    <p>Okay. But Fredric Jameson establishes that in postmodernism we have experienced a weakening sense of historisity such that what is, what was, and what will be all exist as presents in time. <a href="https://en.wikipedia.org/wiki/Forth_(programming_language)#History">1970</a>, <a href="https://groups.google.com/forum/#!msg/alt.hypertext/eCTkkOoWTAY/bJGhZyooXzkJ">1991</a>, <a href="https://en.wikipedia.org/wiki/Gforth#History">1992</a>, and <a href=".">2017</a> all happen simultaneously. Hence developers working on new projects while still coding in decades-old text editors. They write the future in the past and are made present in so doing.</p>
                 </section>
             </article>
         </main>
+        <footer>
+            <h1 class="l1991">
+                <span class="l l1">1</span><!--
+             --><span class="l l9">9</span><!--
+             --><span class="l l9">9</span><!--
+             --><span class="l l1">1</span>
+            </h1>
+        </footer>
     </body>
 </html>

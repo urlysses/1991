@@ -2,7 +2,7 @@ html {
     background: #2637dd;
     font-family: "Roboto Mono", monospace;
     font-weight: 500;
-    color: #d4d4d4;
+    color: #fff;
     -webkit-font-smoothing: antialiased;
 }
 header {
@@ -82,29 +82,36 @@ header p {
     border-left: none;
 }
 
-main {
-    margin-top: 8%;
-}
 article {
     display: block;
-    width: 75%;
-    margin-left: 12.5%;
+    width: 60%;
+    margin-left: 20%;
 }
 section {
     text-align: justify;
+    font-size: 1em;
+    line-height: 2em;
 }
 main h1 {
+    margin-top: 8%;
+    margin-bottom: 0;
     font-family: "Rubik Mono One";
-    background: #d4d4d4;
+    background: #fff;
     color: #2637dd;
     padding: 0.1em 0.3em;
-    font-size: 1.5em;
+    font-size: 1.2em;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+h2 {
+    margin-top: 5%;
 }
 
 strong {
     font-weight: inherit;
     color: #2637dd;
-    background: #d4d4d4;
+    background: #fff;
     padding-left: 0.3em;
     padding-right: 0.3em;
 }
@@ -118,6 +125,22 @@ a:hover {
     text-decoration: line-through;
 }
 
+code {
+    padding: 2px 5px;
+    border: solid 1px;
+    font-family: inherit;
+}
+pre {
+    display: block;
+    border: solid 2px;
+    padding: 10px;
+    margin: 10px 0px;
+    white-space: pre-wrap;
+    font-family: inherit;
+    line-height: 1.5em;
+    overflow: hidden;
+}
+
 ::selection {
     background: #fff;
     color: #2637dd;
@@ -129,3 +152,32 @@ a:hover {
     text-shadow: none;
 }
 
+footer {
+    margin-top: 8%;
+    margin-bottom: 5%;
+    text-align: center;
+}
+
+footer .l1991 {
+    width: 150px;
+    height: 25px;
+    min-width: auto;
+}
+footer .l1991 .l,
+footer .l1991 .l:before,
+footer .l1991 .l:after {
+    border-width: 4px;
+}
+footer .l1991 .l9:before {
+    -webkit-border-radius: 7px;
+    -webkit-border-bottom-right-radius: 0;
+    -moz-border-radius: 7px;
+    -moz-border-radius-bottomright: 0;
+    border-radius: 7px;
+    border-bottom-right-radius: 0;
+}
+footer .l1991 .l9:after {
+    -webkit-border-bottom-right-radius: 8px;
+    -moz-border-radius-bottomright: 8px;
+    border-bottom-right-radius: 8px;
+}
