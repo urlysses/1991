@@ -363,7 +363,22 @@ footer nav a.url:after {
 
 
 /* media queries */
+@media all and (max-width: 900px) {
+    body {
+        font-size: 14px;
+    }
+    article {
+        width: 80%;
+        margin-left: 10%;
+    }
+}
 @media all and (max-width: 600px) {
+    body {
+        font-size: 12px;
+    }
+    main h1 {
+        display: block;
+    }
     article {
         width: 90%;
         margin-left: 5%;
