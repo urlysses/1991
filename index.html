@@ -136,15 +136,17 @@ sourcedir s" views/" s+ set-view-path
     s" Dynamic page title" ;
 : ten-lines ( -- )
     10 0 do
-        s" line " <# #s #> s+
+        s" line " i s>d <# #s #> s+
         s" &lt;br>" s+
         $type
     loop ;
 
 \ Use render-view to output the contents
 \ of a file in the views/ directory.
-: handle-/index
-    s" index.html" render-view ;
+: handle-/
+    s" v-index.html" render-view ;
+
+/1991 / handle-/
 
 \ Start the server on port 8080.
 8080 1991:
