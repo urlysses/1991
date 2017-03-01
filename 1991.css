@@ -95,7 +95,7 @@ section {
 main h1 {
     margin-top: 8%;
     margin-bottom: 0;
-    font-family: "Rubik Mono One";
+    font-family: "Rubik Mono One", sans-serif;
     background: #fff;
     color: #2637dd;
     padding: 0.1em 0.3em;
@@ -106,6 +106,21 @@ main h1 {
 
 h2 {
     margin-top: 5%;
+    position: relative;
+}
+h2::first-letter {
+    color: #2637dd;
+}
+h2:after {
+    content: "";
+    display: block;
+    width: 0.7em;
+    height: 2em;
+    background: #fff;
+    position: absolute;
+    top: 0;
+    left: -0.05em;
+    z-index: -1;
 }
 
 h1, h2, h3, h4, h5 {
@@ -145,6 +160,10 @@ pre {
     line-height: 1.5em;
     overflow: hidden;
     text-align: left;
+}
+p {
+    margin-top: 2em;
+    margin-bottom: 2em;
 }
 
 ::selection {
