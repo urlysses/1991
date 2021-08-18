@@ -464,6 +464,7 @@ s" image/x-icon" filetype: ico
     either-resolve or-404 ;
 
 : start-server { server client }
+    30000000 set-socket-timeout
     begin
         server 255 listen
         server accept-socket to client
