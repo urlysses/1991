@@ -99,11 +99,11 @@ pubvar reqroute
     \ route we're trying to validate.
     >r routes wordlist-id @                     \ Store xt and specify wordlist
     begin
-    dup
+        dup
     while
-        r@ over >r execute while r> @
-    repeat r>
-    then
+	r@ over >r execute  WHILE r> name>link
+    repeat  r>
+    then  
     rdrop
     ?dup if
         get-tmp-query-string                    \ Save our fuzzy vars to the request's
@@ -464,6 +464,7 @@ s" image/x-icon" filetype: ico
     either-resolve or-404 ;
 
 : start-server { server client }
+    30000000 set-socket-timeout
     begin
         server 255 listen
         server accept-socket to client
