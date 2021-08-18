@@ -99,10 +99,10 @@ pubvar reqroute
     \ route we're trying to validate.
     >r routes wordlist-id @                     \ Store xt and specify wordlist
     begin
-	dup
+        dup
     while
-	    r@ over >r execute  WHILE r> name>link
-	repeat  r>
+	r@ over >r execute  WHILE r> name>link
+    repeat  r>
     then  
     rdrop
     ?dup if
