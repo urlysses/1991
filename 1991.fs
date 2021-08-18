@@ -97,7 +97,7 @@ pubvar reqroute
     \ returns true.
     \ Also takes the addr u of the requested
     \ route we're trying to validate.
-    >r routes wordlist-id @
+    >r routes wordlist-id @                     \ Store xt and specify wordlist
     begin
 	dup
     while
