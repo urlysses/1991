@@ -347,11 +347,17 @@ s" image/x-icon" filetype: ico
         0
     then ;
 
+: substring-to-end ( index c-addr u -- c-addr u )
+    rot dup rot swap - rot rot + swap ;
+
 : read-request-body ( socket u -- )
     \ Takes the socket and the length of the
     \ body (Content-Length).
-    here swap aligned read-socket
-    set-request-body ;
+    2over swap drop swap -
+    2over substring-to-end
+    set-request-body
+    drop ;
+
 : read-request ( socket -- addr u )
     \ Returns the request header
     \ but also collects the request body.
